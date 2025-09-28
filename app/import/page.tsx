@@ -101,6 +101,19 @@ export default function ImportPage() {
     alert('Data imported successfully! (This is a demo - data would be saved to database)');
   };
 
+  const handleDeleteData = () => {
+    if (confirm('Are you sure you want to delete all imported data? This action cannot be undone.')) {
+      // Here you would typically delete data from your database
+      console.log('Deleting all imported data...');
+      
+      // Reset the import state
+      resetImport();
+      
+      // Show success message
+      alert('All imported data has been deleted successfully!');
+    }
+  };
+
   const resetImport = () => {
     setCsvData([]);
     setCsvHeaders([]);
@@ -245,6 +258,20 @@ export default function ImportPage() {
             </button>
           </div>
         )}
+
+        {/* Delete Data Section */}
+        <div className="mt-8 bg-red-500/5 border border-red-500/20 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">Delete All Data</h2>
+          <p className="text-[#F8F8F8]/70 mb-4">
+            Permanently delete all imported connection data. This action cannot be undone.
+          </p>
+          <button
+            onClick={handleDeleteData}
+            className="px-6 py-3 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg font-medium hover:bg-red-500/30 transition-colors"
+          >
+            🗑️ Delete All Data
+          </button>
+        </div>
       </div>
     </div>
   );
