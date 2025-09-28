@@ -137,8 +137,7 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
         labels: {
           color: '#F8F8F8',
           font: {
-            size: 12,
-            weight: '500'
+            size: 12
           }
         },
       },
