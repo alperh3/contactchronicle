@@ -80,14 +80,37 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
       {
         label: 'Cumulative Connections',
         data: cumulativeData,
-        borderColor: '#F8F8F8',
-        backgroundColor: 'rgba(248, 248, 248, 0.1)',
-        borderWidth: 2,
+        borderColor: '#A8E6CF',
+        backgroundColor: 'rgba(168, 230, 207, 0.3)',
+        borderWidth: 3,
         fill: true,
         tension: 0.4,
+        pointBackgroundColor: '#A8E6CF',
+        pointBorderColor: '#7FCDCD',
+        pointBorderWidth: 2,
+        pointRadius: 4,
       },
     ],
   };
+
+  // Pastel color palette
+  const pastelColors = [
+    '#A8E6CF', // Mint green
+    '#FFD3A5', // Peach
+    '#FFAAA5', // Coral
+    '#A8DADC', // Sky blue
+    '#F1FAEE', // Cream
+    '#E9C46A', // Golden yellow
+    '#F4A261', // Orange
+    '#E76F51', // Red-orange
+    '#9A8C98', // Mauve
+    '#C9ADA7', // Rose
+    '#B8B8FF', // Lavender
+    '#FFB3BA', // Pink
+    '#BAFFC9', // Light green
+    '#BAE1FF', // Light blue
+    '#FFFFBA', // Light yellow
+  ];
 
   const barChartData = {
     labels: topCompanies.map(([company]) => 
@@ -97,9 +120,11 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
       {
         label: 'Connections',
         data: topCompanies.map(([, count]) => count),
-        backgroundColor: 'rgba(248, 248, 248, 0.8)',
-        borderColor: '#F8F8F8',
-        borderWidth: 1,
+        backgroundColor: topCompanies.map((_, index) => pastelColors[index % pastelColors.length]),
+        borderColor: topCompanies.map((_, index) => pastelColors[index % pastelColors.length]),
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false,
       },
     ],
   };
@@ -111,6 +136,10 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
       legend: {
         labels: {
           color: '#F8F8F8',
+          font: {
+            size: 12,
+            weight: '500'
+          }
         },
       },
     },
@@ -118,17 +147,25 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
       x: {
         ticks: {
           color: '#F8F8F8',
+          font: {
+            size: 11
+          }
         },
         grid: {
           color: 'rgba(248, 248, 248, 0.1)',
+          drawBorder: false,
         },
       },
       y: {
         ticks: {
           color: '#F8F8F8',
+          font: {
+            size: 11
+          }
         },
         grid: {
           color: 'rgba(248, 248, 248, 0.1)',
+          drawBorder: false,
         },
       },
     },

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Papa from 'papaparse';
-import ConnectionMap from '../components/ConnectionMap';
 import ConnectionDetails from '../components/ConnectionDetails';
 
 // Dynamically import the map component to avoid SSR issues
@@ -17,7 +16,11 @@ const DynamicMap = dynamic(() => import('../components/ConnectionMap'), {
       </div>
     </div>
   )
-});
+}) as React.ComponentType<{
+  connections: ConnectionWithLocation[];
+  onConnectionSelect: (connection: ConnectionWithLocation) => void;
+  viewMode: 'world' | 'clusters';
+}>;
 
 interface Connection {
   [key: string]: string;
