@@ -1,103 +1,125 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from 'react';
+import ConnectionsTable from './components/ConnectionsTable';
+import ConnectionsChart from './components/ConnectionsChart';
+import StatsCards from './components/StatsCards';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+interface Connection {
+  firstName: string;
+  lastName: string;
+  url: string;
+  emailAddress: string;
+  company: string;
+  position: string;
+  connectedOn: string;
+}
+
+export default function Dashboard() {
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState({ company: '', position: '' });
+
+  useEffect(() => {
+    // Load connections data
+    fetch('/data/linkedin_connections.csv')
+      .then(response => response.text())
+      .then(csvText => {
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        
+        const data = lines.slice(1)
+          .filter(line => line.trim())
+          .map(line => {
+            const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+            const connection: any = {};
+            headers.forEach((header, index) => {
+              connection[header] = values[index] || '';
+            });
+            return connection;
+          })
+          .filter(conn => conn['First Name'] && conn['Last Name']); // Filter out empty rows
+
+        setConnections(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading connections:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredConnections = connections.filter(conn => {
+    const companyMatch = !filter.company || 
+      conn['Company']?.toLowerCase().includes(filter.company.toLowerCase());
+    const positionMatch = !filter.position || 
+      conn['Position']?.toLowerCase().includes(filter.position.toLowerCase());
+    return companyMatch && positionMatch;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F8F8F8] mx-auto mb-4"></div>
+          <p className="text-[#F8F8F8]/70">Loading your connections...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#04090F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#F8F8F8] mb-2">Dashboard</h1>
+          <p className="text-[#F8F8F8]/70">
+            Transform Your LinkedIn Connections Into Insights
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <StatsCards connections={connections} />
+
+        {/* Charts Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">Network Growth</h2>
+          <ConnectionsChart connections={connections} />
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Filter by company..."
+              value={filter.company}
+              onChange={(e) => setFilter(prev => ({ ...prev, company: e.target.value }))}
+              className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
+            />
+          </div>
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Filter by position..."
+              value={filter.position}
+              onChange={(e) => setFilter(prev => ({ ...prev, position: e.target.value }))}
+              className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
+            />
+          </div>
+        </div>
+
+        {/* Connections Table */}
+        <div className="bg-[#6E6E6E]/5 rounded-lg border border-[#6E6E6E]/20">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">
+              Connections ({filteredConnections.length})
+            </h2>
+            <ConnectionsTable connections={filteredConnections} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
