@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from './AuthProvider';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Dashboard' },
@@ -42,6 +44,27 @@ export default function Navigation() {
                   {item.label}
                 </Link>
               ))}
+              
+              {user ? (
+                <div className="flex items-center space-x-4 ml-8">
+                  <span className="text-sm text-[#F8F8F8]/70">
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={signOut}
+                    className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/auth"
+                  className="ml-8 text-sm font-medium text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
 
@@ -90,6 +113,27 @@ export default function Navigation() {
               {item.label}
             </Link>
           ))}
+          
+          {user ? (
+            <div className="px-3 py-2 border-t border-[#6E6E6E]/20 mt-2">
+              <div className="text-sm text-[#F8F8F8]/70 mb-2">
+                {user.email}
+              </div>
+              <button
+                onClick={signOut}
+                className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/auth"
+              className="block px-3 py-2 rounded-md text-base font-medium text-[#F8F8F8]/70 hover:text-[#F8F8F8] hover:bg-[#6E6E6E]/10 transition-colors duration-200"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

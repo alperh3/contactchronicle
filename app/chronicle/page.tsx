@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { supabase, Connection } from '../../lib/supabase';
 import ConnectionDetails from '../components/ConnectionDetails';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 // Dynamically import the map component to avoid SSR issues
 const DynamicMap = dynamic(() => import('../components/ConnectionMap'), {
@@ -51,7 +52,7 @@ export default function ChroniclePage() {
         .from('connections')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10000); // Increase limit to fetch all connections
+        .range(0, 4999); // Increase limit to fetch all connections
 
       if (error) {
         console.error('Error loading connections:', error);
@@ -275,8 +276,9 @@ export default function ChroniclePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#04090F]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#04090F]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#F8F8F8] mb-2">View Chronicle</h1>
@@ -474,7 +476,8 @@ export default function ChroniclePage() {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

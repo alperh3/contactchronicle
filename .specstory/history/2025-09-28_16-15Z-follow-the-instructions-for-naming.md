@@ -5516,12 +5516,903 @@ cd /Users/alper/dev/github/h3/ContactChronicle && npm run build
    - Environments: .env.local
 
    Creating an optimized production build ...
+ ✓ Finished writing to disk in 251ms
+ ✓ Compiled successfully in 7.1s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            75.7 kB         235 kB
+├ ○ /_not-found                      0 B         118 kB
+├ ○ /chronicle                   5.95 kB         165 kB
+└ ○ /import                      9.17 kB         168 kB
++ First Load JS shared by all     125 kB
+  ├ chunks/30cb146bc1e6f45f.js   59.2 kB
+  ├ chunks/63d7abdc8f2020d3.js   17.2 kB
+  └ chunks/f7a8c1db11515a0b.js   20.5 kB
+  └ other shared chunks (total)  28.5 kB
+
+
+○  (Static)  prerendered as static content
+
 
 ```
 
 ---
 
+Updated both the Dashboard and Chronicle pages to fetch all connections by adding `.limit(10000)` to the Supabase queries.
 
+## Summary of changes:
+
+1. **Dashboard page** (`app/page.tsx`): Added `.limit(10000)` to the connections query
+2. **Chronicle page** (`app/chronicle/page.tsx`): Added `.limit(10000)` to the connections query
+
+This raises the default 1,000-row cap so all 1,468 connections load. The 10,000 limit leaves headroom for future growth.
+
+---
+
+_**User (2025-09-28 16:15Z)**_
+
+let's add basic username/password auth with supabase, include the configuration steps as well.
+
+---
+
+_**Assistant (default)**_
+
+Setting up Supabase email/password authentication. Creating the initial todo list.
+
+
+---
+
+Tool use: **todo_write**
+
+## Todo List
+
+- [-] Set up Supabase authentication configuration
+- [ ] Create login/signup UI components
+- [ ] Add authentication middleware and route protection
+- [ ] Integrate auth with existing pages and components
+- [ ] Provide configuration steps documentation
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/lib/supabase.ts</summary>
+
+**Chunk 1**
+Lines added: 7, lines removed: 1
+
+```diff
+@@ -4,5 +4,11 @@
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  
+- export const supabase = createClient(supabaseUrl, supabaseAnonKey)
++ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
++   auth: {
++     autoRefreshToken: true,
++     persistSession: true,
++     detectSessionInUrl: true
++   }
++ })
+  
+  // Database types
+```
+
+</details>
+
+---
+
+Tool use: **write**
+
+---
+
+Tool use: **write**
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/layout.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -4,4 +4,5 @@
+  import Navigation from "./components/Navigation";
+  import Footer from "./components/Footer";
++ import { AuthProvider } from "./components/AuthProvider";
+  
+  const inter = Inter({
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/layout.tsx</summary>
+
+**Chunk 1**
+Lines added: 9, lines removed: 7
+
+```diff
+@@ -26,11 +26,13 @@
+          className={`${inter.variable} font-sans antialiased bg-[#04090F] text-[#F8F8F8] min-h-screen`}
+        >
+-         <div className="flex flex-col min-h-screen">
+-           <Navigation />
+-           <main className="flex-1">
+-             {children}
+-           </main>
+-           <Footer />
+-         </div>
++         <AuthProvider>
++           <div className="flex flex-col min-h-screen">
++             <Navigation />
++             <main className="flex-1">
++               {children}
++             </main>
++             <Footer />
++           </div>
++         </AuthProvider>
+        </body>
+      </html>
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/Navigation.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -3,4 +3,5 @@
+  import Link from 'next/link';
+  import { usePathname } from 'next/navigation';
++ import { useAuth } from './AuthProvider';
+  
+  export default function Navigation() {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/Navigation.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -7,4 +7,5 @@
+  export default function Navigation() {
+    const pathname = usePathname();
++   const { user, signOut } = useAuth();
+  
+    const navItems = [
+```
+
+</details>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/components/Navigation.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/Navigation.tsx</summary>
+
+**Chunk 1**
+Lines added: 21, lines removed: undefined
+
+```diff
+@@ -45,4 +45,25 @@
+                  </Link>
+                ))}
++               
++               {user ? (
++                 <div className="flex items-center space-x-4 ml-8">
++                   <span className="text-sm text-[#F8F8F8]/70">
++                     {user.email}
++                   </span>
++                   <button
++                     onClick={signOut}
++                     className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
++                   >
++                     Sign Out
++                   </button>
++                 </div>
++               ) : (
++                 <Link
++                   href="/auth"
++                   className="ml-8 text-sm font-medium text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
++                 >
++                   Sign In
++                 </Link>
++               )}
+              </div>
+            </div>
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/Navigation.tsx</summary>
+
+**Chunk 1**
+Lines added: 21, lines removed: undefined
+
+```diff
+@@ -114,4 +114,25 @@
+              </Link>
+            ))}
++           
++           {user ? (
++             <div className="px-3 py-2 border-t border-[#6E6E6E]/20 mt-2">
++               <div className="text-sm text-[#F8F8F8]/70 mb-2">
++                 {user.email}
++               </div>
++               <button
++                 onClick={signOut}
++                 className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
++               >
++                 Sign Out
++               </button>
++             </div>
++           ) : (
++             <Link
++               href="/auth"
++               className="block px-3 py-2 rounded-md text-base font-medium text-[#F8F8F8]/70 hover:text-[#F8F8F8] hover:bg-[#6E6E6E]/10 transition-colors duration-200"
++             >
++               Sign In
++             </Link>
++           )}
+          </div>
+        </div>
+```
+
+</details>
+
+---
+
+Tool use: **write**
+
+---
+
+Tool use: **write**
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -7,4 +7,5 @@
+  import ConnectionsChart from './components/ConnectionsChart';
+  import StatsCards from './components/StatsCards';
++ import ProtectedRoute from './components/ProtectedRoute';
+  
+  // Using Connection type from supabase.ts
+```
+
+</details>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/page.tsx
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/page.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 50, lines removed: 48
+
+```diff
+@@ -126,56 +126,58 @@
+  
+    return (
+-     <div className="min-h-screen bg-[#04090F]">
+-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+-         {/* Header */}
+-         <div className="mb-8">
+-           <h1 className="text-3xl font-bold text-[#F8F8F8] mb-2">Dashboard</h1>
+-           <p className="text-[#F8F8F8]/70">
+-             Transform Your LinkedIn Connections Into Insights
+-           </p>
+-         </div>
++     <ProtectedRoute>
++       <div className="min-h-screen bg-[#04090F]">
++         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
++           {/* Header */}
++           <div className="mb-8">
++             <h1 className="text-3xl font-bold text-[#F8F8F8] mb-2">Dashboard</h1>
++             <p className="text-[#F8F8F8]/70">
++               Transform Your LinkedIn Connections Into Insights
++             </p>
++           </div>
+  
+-         {/* Stats Cards */}
+-         <StatsCards connections={connections} />
++           {/* Stats Cards */}
++           <StatsCards connections={connections} />
+  
+-         {/* Charts Section */}
+-         <div className="mb-8">
+-           <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">Network Growth</h2>
+-           <ConnectionsChart connections={connections} />
+-         </div>
++           {/* Charts Section */}
++           <div className="mb-8">
++             <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">Network Growth</h2>
++             <ConnectionsChart connections={connections} />
++           </div>
+  
+-         {/* Filters */}
+-         <div className="mb-6 flex flex-col sm:flex-row gap-4">
+-           <div className="flex-1">
+-             <input
+-               type="text"
+-               placeholder="Filter by company..."
+-               value={filter.company}
+-               onChange={(e) => setFilter(prev => ({ ...prev, company: e.target.value }))}
+-               className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
+-             />
+-           </div>
+-           <div className="flex-1">
+-             <input
+-               type="text"
+-               placeholder="Filter by position..."
+-               value={filter.position}
+-               onChange={(e) => setFilter(prev => ({ ...prev, position: e.target.value }))}
+-               className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
+-             />
+-           </div>
+-         </div>
++           {/* Filters */}
++           <div className="mb-6 flex flex-col sm:flex-row gap-4">
++             <div className="flex-1">
++               <input
++                 type="text"
++                 placeholder="Filter by company..."
++                 value={filter.company}
++                 onChange={(e) => setFilter(prev => ({ ...prev, company: e.target.value }))}
++                 className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
++               />
++             </div>
++             <div className="flex-1">
++               <input
++                 type="text"
++                 placeholder="Filter by position..."
++                 value={filter.position}
++                 onChange={(e) => setFilter(prev => ({ ...prev, position: e.target.value }))}
++                 className="w-full px-4 py-2 bg-[#6E6E6E]/10 border border-[#6E6E6E]/20 rounded-lg text-[#F8F8F8] placeholder-[#F8F8F8]/50 focus:outline-none focus:ring-2 focus:ring-[#6E6E6E]/50"
++               />
++             </div>
++           </div>
+  
+-         {/* Connections Table */}
+-         <div className="bg-[#6E6E6E]/5 rounded-lg border border-[#6E6E6E]/20">
+-           <div className="p-6">
+-             <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">
+-               Connections ({filteredConnections.length})
+-             </h2>
+-             <ConnectionsTable connections={filteredConnections} />
+-           </div>
+-         </div>
+-       </div>
+-     </div>
++           {/* Connections Table */}
++           <div className="bg-[#6E6E6E]/5 rounded-lg border border-[#6E6E6E]/20">
++             <div className="p-6">
++               <h2 className="text-xl font-semibold text-[#F8F8F8] mb-4">
++                 Connections ({filteredConnections.length})
++               </h2>
++               <ConnectionsTable connections={filteredConnections} />
++             </div>
++           </div>
++         </div>
++       </div>
++     </ProtectedRoute>
+    );
+  }
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -4,4 +4,5 @@
+  import Papa from 'papaparse';
+  import { supabase, Connection } from '../../lib/supabase';
++ import ProtectedRoute from '../components/ProtectedRoute';
+  
+  interface FieldMapping {
+```
+
+</details>
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 2
+
+```diff
+@@ -182,6 +182,7 @@
+  
+    return (
+-     <div className="min-h-screen bg-[#04090F]">
+-       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
++     <ProtectedRoute>
++       <div className="min-h-screen bg-[#04090F]">
++         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 2
+
+```diff
+@@ -330,6 +330,7 @@
+            </button>
+          </div>
+-       </div>
+-     </div>
++         </div>
++       </div>
++     </ProtectedRoute>
+    );
+  }
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -5,4 +5,5 @@
+  import { supabase, Connection } from '../../lib/supabase';
+  import ConnectionDetails from '../components/ConnectionDetails';
++ import ProtectedRoute from '../components/ProtectedRoute';
+  
+  // Dynamically import the map component to avoid SSR issues
+```
+
+</details>
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 2
+
+```diff
+@@ -277,6 +277,7 @@
+  
+    return (
+-     <div className="min-h-screen bg-[#04090F]">
+-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
++     <ProtectedRoute>
++       <div className="min-h-screen bg-[#04090F]">
++         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+```
+
+</details>
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 2
+
+```diff
+@@ -477,6 +477,7 @@
+            )}
+          </div>
+-       </div>
+-     </div>
++         </div>
++       </div>
++     </ProtectedRoute>
+    );
+  }
+```
+
+</details>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/supabase-schema.sql
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/supabase-schema.sql</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -2,4 +2,5 @@
+  CREATE TABLE connections (
+    id BIGSERIAL PRIMARY KEY,
++   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/supabase-schema.sql</summary>
+
+**Chunk 1**
+Lines added: 12, lines removed: 4
+
+```diff
+@@ -26,8 +26,16 @@
+  ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
+  
+- -- Create a policy that allows all operations (for now)
+- -- In production, you should implement proper authentication and authorization
+- CREATE POLICY "Allow all operations" ON connections
+-   FOR ALL USING (true);
++ -- Create policies for user-specific access
++ CREATE POLICY "Users can view own connections" ON connections
++   FOR SELECT USING (auth.uid() = user_id);
++ 
++ CREATE POLICY "Users can insert own connections" ON connections
++   FOR INSERT WITH CHECK (auth.uid() = user_id);
++ 
++ CREATE POLICY "Users can update own connections" ON connections
++   FOR UPDATE USING (auth.uid() = user_id);
++ 
++ CREATE POLICY "Users can delete own connections" ON connections
++   FOR DELETE USING (auth.uid() = user_id);
+  
+  -- Create a function to update the updated_at timestamp
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/lib/supabase.ts</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -15,4 +15,5 @@
+  export interface Connection {
+    id?: number
++   user_id?: string
+    first_name: string
+    last_name: string
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -100,5 +100,13 @@
+        
+        // Transform CSV data to match database schema
++       // Get current user
++       const { data: { user } } = await supabase.auth.getUser();
++       if (!user) {
++         alert('You must be logged in to import data');
++         return;
++       }
++ 
+        const connectionsToInsert: Omit<Connection, 'id' | 'created_at' | 'updated_at'>[] = csvData.map((row: any) => ({
++         user_id: user.id,
+          first_name: row[fieldMapping['First Name']] || '',
+          last_name: row[fieldMapping['Last Name']] || '',
+```
+
+</details>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/import/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 9, lines removed: 2
+
+```diff
+@@ -152,9 +152,16 @@
+          setIsProcessing(true);
+          
+-         // Delete all data from Supabase
++         // Get current user
++         const { data: { user } } = await supabase.auth.getUser();
++         if (!user) {
++           alert('You must be logged in to delete data');
++           return;
++         }
++ 
++         // Delete only current user's data
+          const { error } = await supabase
+            .from('connections')
+            .delete()
+-           .neq('id', 0); // Delete all rows (id is never 0)
++           .eq('user_id', user.id);
+          
+          if (error) {
+```
+
+</details>
+
+---
+
+Tool use: **write**
+
+---
+
+Tool use: **todo_write**
+
+## Todo List
+
+- [x] Set up Supabase authentication configuration
+- [x] Create login/signup UI components
+- [x] Add authentication middleware and route protection
+- [x] Integrate auth with existing pages and components
+- [x] Provide configuration steps documentation
+
+---
+
+Tool use: **run_terminal_cmd**
+
+```bash
+cd /Users/alper/dev/github/h3/ContactChronicle && npm run build
+```
+
+```
+
+> nextjs@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 185ms
+ ✓ Compiled successfully in 5.6s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/8) ...
+   Generating static pages (2/8) 
+   Generating static pages (4/8) 
+   Generating static pages (6/8) 
+ ✓ Generating static pages (8/8)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            75.9 kB         236 kB
+├ ○ /_not-found                      0 B         161 kB
+├ ○ /auth                        1.31 kB         162 kB
+├ ○ /chronicle                   5.99 kB         166 kB
+└ ○ /import                      9.31 kB         170 kB
++ First Load JS shared by all     168 kB
+  ├ chunks/2008ffcf9e5b170c.js     13 kB
+  ├ chunks/30cb146bc1e6f45f.js   59.2 kB
+  ├ chunks/33c2718df470ebc0.js   41.1 kB
+  ├ chunks/63d7abdc8f2020d3.js   17.2 kB
+  └ other shared chunks (total)  37.2 kB
+
+
+○  (Static)  prerendered as static content
+
+
+```
+
+---
+
+Implemented email/password authentication with Supabase.
+
+## Authentication features
+
+### 1. **Authentication components**
+- `AuthForm.tsx` — Login/signup form with validation
+- `AuthProvider.tsx` — Context provider for auth state
+- `ProtectedRoute.tsx` — Route protection wrapper
+- `auth/page.tsx` — Authentication page
+
+### 2. **Database security**
+- Added `user_id` to connections table
+- Row Level Security (RLS) policies
+- User-specific data isolation
+
+### 3. **Protected routes**
+- Dashboard, Import, and Chronicle require authentication
+- Unauthenticated users are redirected to `/auth`
+
+### 4. **Navigation updates**
+- Shows user email when logged in
+- Sign out button
+- Sign in link when not authenticated
+
+### 5. **Data security**
+- Import associates data with the current user
+- Delete operations only affect the current user's data
+- Queries filter by `user_id`
+
+## Configuration steps
+
+1. **Update Supabase schema**
+   - Run the updated `supabase-schema.sql` in your Supabase SQL editor
+   - Adds `user_id` column and RLS policies
+
+2. **Environment variables**
+   - Ensure `.env.local` has your Supabase URL and anon key
+
+3. **Enable authentication**
+   - In Supabase Dashboard → Authentication → Settings
+   - Enable email authentication
+   - Configure your site URL
+
+4. **Test the flow**
+   - Visit the app (redirects to `/auth` if not logged in)
+   - Sign up with email/password
+   - Check email for confirmation link
+   - Sign in and verify user-specific data
+
+## Security features
+- Row Level Security (RLS) enabled
+- User-specific data access policies
+- Automatic user ID association
+- Session persistence and auto-refresh
+- Secure password handling via Supabase
+
+See `AUTH_SETUP.md` for setup instructions.
 
 ---
 

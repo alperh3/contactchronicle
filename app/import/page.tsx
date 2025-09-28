@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import { supabase, Connection } from '../../lib/supabase';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 interface FieldMapping {
   [key: string]: string;
@@ -98,7 +99,15 @@ export default function ImportPage() {
       setIsProcessing(true);
       
       // Transform CSV data to match database schema
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('You must be logged in to import data');
+        return;
+      }
+
       const connectionsToInsert: Omit<Connection, 'id' | 'created_at' | 'updated_at'>[] = csvData.map((row: any) => ({
+        user_id: user.id,
         first_name: row[fieldMapping['First Name']] || '',
         last_name: row[fieldMapping['Last Name']] || '',
         url: row[fieldMapping['URL']] || null,
@@ -142,11 +151,18 @@ export default function ImportPage() {
       try {
         setIsProcessing(true);
         
-        // Delete all data from Supabase
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert('You must be logged in to delete data');
+          return;
+        }
+
+        // Delete only current user's data
         const { error } = await supabase
           .from('connections')
           .delete()
-          .neq('id', 0); // Delete all rows (id is never 0)
+          .eq('user_id', user.id);
         
         if (error) {
           console.error('Error deleting data:', error);
@@ -180,8 +196,9 @@ export default function ImportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#04090F]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#04090F]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#F8F8F8] mb-2">Import LinkedIn Connections</h1>
@@ -327,7 +344,8 @@ export default function ImportPage() {
             🗑️ Delete All Data
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

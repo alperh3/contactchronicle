@@ -1,6 +1,7 @@
 -- Create connections table
 CREATE TABLE connections (
   id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   url TEXT,
@@ -24,10 +25,18 @@ CREATE INDEX idx_connections_connected_on ON connections(connected_on);
 -- Enable Row Level Security (RLS)
 ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
 
--- Create a policy that allows all operations (for now)
--- In production, you should implement proper authentication and authorization
-CREATE POLICY "Allow all operations" ON connections
-  FOR ALL USING (true);
+-- Create policies for user-specific access
+CREATE POLICY "Users can view own connections" ON connections
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own connections" ON connections
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own connections" ON connections
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own connections" ON connections
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Create a function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
