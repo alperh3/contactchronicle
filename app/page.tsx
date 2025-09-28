@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Papa from 'papaparse';
+import { supabase, Connection } from '../lib/supabase';
 import ConnectionsTable from './components/ConnectionsTable';
 import ConnectionsChart from './components/ConnectionsChart';
 import StatsCards from './components/StatsCards';
 
-interface Connection {
-  [key: string]: string;
-}
+// Using Connection type from supabase.ts
 
 export default function Dashboard() {
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -16,50 +14,99 @@ export default function Dashboard() {
   const [filter, setFilter] = useState({ company: '', position: '' });
 
   useEffect(() => {
-    // Load connections data
-    fetch('/data/linkedin_connections.csv')
-      .then(response => response.text())
-      .then(csvText => {
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          delimiter: ',',
-          quoteChar: '"',
-          escapeChar: '"',
-          complete: (results) => {
-            if (results.errors.length > 0) {
-              console.error('CSV parsing errors:', results.errors);
-            }
-            
-            // Filter out empty rows and rows with all empty values
-            const filteredData = results.data.filter((row: any) => {
-              // Check if row has any non-empty values
-              const hasContent = Object.values(row).some(value => 
-                value && typeof value === 'string' && value.trim() !== ''
-              );
-              return hasContent && row['First Name'] && row['Last Name'];
-            });
-
-            setConnections(filteredData as Connection[]);
-            setLoading(false);
-          },
-          error: (error: any) => {
-            console.error('Error parsing CSV:', error);
-            setLoading(false);
-          }
-        });
-      })
-      .catch(error => {
-        console.error('Error loading connections:', error);
-        setLoading(false);
-      });
+    loadConnections();
   }, []);
+
+  const loadConnections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('connections')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading connections:', error);
+        // Fallback to CSV if database is empty
+        loadFromCSV();
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setConnections(data);
+      } else {
+        // Fallback to CSV if database is empty
+        loadFromCSV();
+      }
+    } catch (error) {
+      console.error('Error loading connections:', error);
+      // Fallback to CSV
+      loadFromCSV();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFromCSV = async () => {
+    try {
+      const response = await fetch('/data/linkedin_connections.csv');
+      const csvText = await response.text();
+      
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        delimiter: ',',
+        quoteChar: '"',
+        escapeChar: '"',
+        complete: (results) => {
+          if (results.errors.length > 0) {
+            console.error('CSV parsing errors:', results.errors);
+          }
+          
+          // Filter out empty rows and rows with all empty values
+          const filteredData = results.data.filter((row: any) => {
+            // Check if row has any non-empty values
+            const hasContent = Object.values(row).some(value => 
+              value && typeof value === 'string' && value.trim() !== ''
+            );
+            return hasContent && row['First Name'] && row['Last Name'];
+          });
+
+          // Transform CSV data to match Connection interface
+          const transformedData: Connection[] = filteredData.map((row: any) => ({
+            id: Math.random(), // Temporary ID for CSV data
+            first_name: row['First Name'] || '',
+            last_name: row['Last Name'] || '',
+            url: row['URL'] || null,
+            email_address: row['Email Address'] || null,
+            company: row['Company'] || null,
+            position: row['Position'] || null,
+            connected_on: row['Connected On'] || null,
+            location: null,
+            latitude: null,
+            longitude: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }));
+
+          setConnections(transformedData);
+          setLoading(false);
+        },
+        error: (error: any) => {
+          console.error('Error parsing CSV:', error);
+          setLoading(false);
+        }
+      });
+    } catch (error) {
+      console.error('Error loading CSV:', error);
+      setLoading(false);
+    }
+  };
 
   const filteredConnections = connections.filter(conn => {
     const companyMatch = !filter.company || 
-      conn['Company']?.toLowerCase().includes(filter.company.toLowerCase());
+      conn.company?.toLowerCase().includes(filter.company.toLowerCase());
     const positionMatch = !filter.position || 
-      conn['Position']?.toLowerCase().includes(filter.position.toLowerCase());
+      conn.position?.toLowerCase().includes(filter.position.toLowerCase());
     return companyMatch && positionMatch;
   });
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
+import { supabase, Connection } from '../../lib/supabase';
 
 interface FieldMapping {
   [key: string]: string;
@@ -92,25 +93,79 @@ export default function ImportPage() {
     }));
   };
 
-  const handleImport = () => {
-    // Here you would typically save the mapped data to your database
-    console.log('Importing data with mapping:', fieldMapping);
-    console.log('Sample data:', csvData.slice(0, 5));
-    
-    // For now, just show success message
-    alert('Data imported successfully! (This is a demo - data would be saved to database)');
-  };
-
-  const handleDeleteData = () => {
-    if (confirm('Are you sure you want to delete all imported data? This action cannot be undone.')) {
-      // Here you would typically delete data from your database
-      console.log('Deleting all imported data...');
+  const handleImport = async () => {
+    try {
+      setIsProcessing(true);
       
-      // Reset the import state
+      // Transform CSV data to match database schema
+      const connectionsToInsert: Omit<Connection, 'id' | 'created_at' | 'updated_at'>[] = csvData.map((row: any) => ({
+        first_name: row[fieldMapping['First Name']] || '',
+        last_name: row[fieldMapping['Last Name']] || '',
+        url: row[fieldMapping['URL']] || null,
+        email_address: row[fieldMapping['Email Address']] || null,
+        company: row[fieldMapping['Company']] || null,
+        position: row[fieldMapping['Position']] || null,
+        connected_on: row[fieldMapping['Connected On']] || null,
+        location: null, // Will be populated later
+        latitude: null,
+        longitude: null
+      }));
+
+      // Insert data into Supabase
+      const { data, error } = await supabase
+        .from('connections')
+        .insert(connectionsToInsert)
+        .select();
+
+      if (error) {
+        console.error('Error inserting data:', error);
+        alert('Error importing data: ' + error.message);
+        return;
+      }
+
+      console.log('Successfully imported', data.length, 'connections');
+      alert(`Successfully imported ${data.length} connections to the database!`);
+      
+      // Reset the form
       resetImport();
       
-      // Show success message
-      alert('All imported data has been deleted successfully!');
+    } catch (error) {
+      console.error('Import error:', error);
+      alert('An error occurred while importing data');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteData = async () => {
+    if (confirm('Are you sure you want to delete all imported data? This action cannot be undone.')) {
+      try {
+        setIsProcessing(true);
+        
+        // Delete all data from Supabase
+        const { error } = await supabase
+          .from('connections')
+          .delete()
+          .neq('id', 0); // Delete all rows (id is never 0)
+        
+        if (error) {
+          console.error('Error deleting data:', error);
+          alert('Error deleting data: ' + error.message);
+          return;
+        }
+        
+        console.log('Successfully deleted all data');
+        alert('All imported data has been deleted successfully!');
+        
+        // Reset the import state
+        resetImport();
+        
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('An error occurred while deleting data');
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
