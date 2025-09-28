@@ -16,12 +16,18 @@ This guide will help you set up email/password authentication with Supabase for 
 2. **Enable Email Authentication**
    - Under **Auth Providers**, ensure **Email** is enabled
    - Configure your site URL (e.g., `http://localhost:3000` for development)
+   - **Important**: Add your production domain to the **Site URL** and **Redirect URLs**
    - Set up email templates if desired
 
 3. **Configure Email Settings**
    - Go to **Authentication** → **Settings** → **SMTP Settings**
    - Configure your SMTP settings or use Supabase's default email service
    - For development, you can use the default settings
+
+4. **Configure JWT Settings**
+   - Go to **Authentication** → **Settings** → **JWT Settings**
+   - Ensure **JWT expiry** is set appropriately (default 3600 seconds is fine)
+   - **Important**: Make sure your production domain is properly configured
 
 ## Step 2: Update Database Schema
 
@@ -106,6 +112,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    - Check that environment variables are set correctly
    - Verify Supabase client configuration
    - Ensure auth state is being managed properly
+
+4. **"Session not found" error on sign out**
+   - Ensure your production domain is added to Supabase **Site URL** and **Redirect URLs**
+   - Check that JWT settings are properly configured
+   - Verify environment variables are correct in production
+   - The app now includes fallback sign out that clears local session even if server signout fails
 
 ### Debug Steps
 

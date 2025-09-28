@@ -51,7 +51,12 @@ export default function Navigation() {
                     {user.email}
                   </span>
                   <button
-                    onClick={signOut}
+                    onClick={() => {
+                      signOut().then(() => {
+                        // Force page reload to clear any cached state
+                        window.location.href = '/auth';
+                      });
+                    }}
                     className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
                   >
                     Sign Out
@@ -120,7 +125,12 @@ export default function Navigation() {
                 {user.email}
               </div>
               <button
-                onClick={signOut}
+                onClick={() => {
+                  signOut().then(() => {
+                    // Force page reload to clear any cached state
+                    window.location.href = '/auth';
+                  });
+                }}
                 className="text-sm text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"
               >
                 Sign Out

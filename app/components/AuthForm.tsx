@@ -108,6 +108,19 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
             </button>
           </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-[#F8F8F8]/70 hover:text-[#F8F8F8] text-sm"
+            >
+              {isLogin 
+                ? "Don't have an account? Sign up" 
+                : "Already have an account? Sign in"
+              }
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -39,7 +39,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        // Force clear local session even if server signout fails
+        setSession(null);
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Force clear local session
+      setSession(null);
+      setUser(null);
+    }
   };
 
   const value = {

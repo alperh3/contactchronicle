@@ -48,6 +48,17 @@ export default function ChroniclePage() {
 
   const loadConnections = async () => {
     try {
+      // First, get the total count
+      const { count, error: countError } = await supabase
+        .from('connections')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('Error getting count:', countError);
+      } else {
+        console.log('Total connections in database:', count);
+      }
+
       const { data, error } = await supabase
         .from('connections')
         .select('*')
@@ -61,6 +72,7 @@ export default function ChroniclePage() {
         return;
       }
 
+      console.log('Loaded connections:', data?.length);
       if (data && data.length > 0) {
         // Add location data to connections
         const connectionsWithLocation = addLocationData(data);
