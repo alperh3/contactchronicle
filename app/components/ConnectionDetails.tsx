@@ -1,5 +1,5 @@
 interface Connection {
-  [key: string]: string;
+  [key: string]: any;
   latitude?: number;
   longitude?: number;
   location?: string;

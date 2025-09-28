@@ -1,18 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Papa from 'papaparse';
 import ConnectionsTable from './components/ConnectionsTable';
 import ConnectionsChart from './components/ConnectionsChart';
 import StatsCards from './components/StatsCards';
 
 interface Connection {
-  firstName: string;
-  lastName: string;
-  url: string;
-  emailAddress: string;
-  company: string;
-  position: string;
-  connectedOn: string;
+  [key: string]: string;
 }
 
 export default function Dashboard() {
@@ -25,23 +20,34 @@ export default function Dashboard() {
     fetch('/data/linkedin_connections.csv')
       .then(response => response.text())
       .then(csvText => {
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        
-        const data = lines.slice(1)
-          .filter(line => line.trim())
-          .map(line => {
-            const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-            const connection: any = {};
-            headers.forEach((header, index) => {
-              connection[header] = values[index] || '';
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          delimiter: ',',
+          quoteChar: '"',
+          escapeChar: '"',
+          complete: (results) => {
+            if (results.errors.length > 0) {
+              console.error('CSV parsing errors:', results.errors);
+            }
+            
+            // Filter out empty rows and rows with all empty values
+            const filteredData = results.data.filter((row: any) => {
+              // Check if row has any non-empty values
+              const hasContent = Object.values(row).some(value => 
+                value && typeof value === 'string' && value.trim() !== ''
+              );
+              return hasContent && row['First Name'] && row['Last Name'];
             });
-            return connection;
-          })
-          .filter(conn => conn['First Name'] && conn['Last Name']); // Filter out empty rows
 
-        setConnections(data);
-        setLoading(false);
+            setConnections(filteredData as Connection[]);
+            setLoading(false);
+          },
+          error: (error: any) => {
+            console.error('Error parsing CSV:', error);
+            setLoading(false);
+          }
+        });
       })
       .catch(error => {
         console.error('Error loading connections:', error);

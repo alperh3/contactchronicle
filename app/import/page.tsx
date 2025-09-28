@@ -34,26 +34,44 @@ export default function ImportPage() {
 
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
+      delimiter: ',',
+      quoteChar: '"',
+      escapeChar: '"',
       complete: (results) => {
         if (results.errors.length > 0) {
           console.error('CSV parsing errors:', results.errors);
           setUploadStatus('error');
         } else {
-          setCsvData(results.data);
-          setCsvHeaders(Object.keys(results.data[0] || {}));
-          
-          // Auto-map fields based on common patterns
-          const autoMapping: FieldMapping = {};
-          DEFAULT_FIELDS.forEach(defaultField => {
-            const matchingHeader = csvHeaders.find(header => 
-              header.toLowerCase().includes(defaultField.toLowerCase()) ||
-              defaultField.toLowerCase().includes(header.toLowerCase())
+          // Filter out empty rows and rows with all empty values
+          const filteredData = results.data.filter((row: any) => {
+            // Check if row has any non-empty values
+            return Object.values(row).some(value => 
+              value && typeof value === 'string' && value.trim() !== ''
             );
-            if (matchingHeader) {
-              autoMapping[defaultField] = matchingHeader;
-            }
           });
-          setFieldMapping(autoMapping);
+          
+          setCsvData(filteredData);
+          
+          // Get headers from the first non-empty row
+          const firstRow = filteredData[0];
+          if (firstRow) {
+            const headers = Object.keys(firstRow);
+            setCsvHeaders(headers);
+            
+            // Auto-map fields based on common patterns
+            const autoMapping: FieldMapping = {};
+            DEFAULT_FIELDS.forEach(defaultField => {
+              const matchingHeader = headers.find(header => 
+                header.toLowerCase().includes(defaultField.toLowerCase()) ||
+                defaultField.toLowerCase().includes(header.toLowerCase())
+              );
+              if (matchingHeader) {
+                autoMapping[defaultField] = matchingHeader;
+              }
+            });
+            setFieldMapping(autoMapping);
+          }
           
           setUploadStatus('success');
         }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Papa from 'papaparse';
 import ConnectionMap from '../components/ConnectionMap';
 import ConnectionDetails from '../components/ConnectionDetails';
 
@@ -26,6 +27,7 @@ interface ConnectionWithLocation extends Connection {
   latitude?: number;
   longitude?: number;
   location?: string;
+  [key: string]: any;
 }
 
 export default function ChroniclePage() {
@@ -39,32 +41,43 @@ export default function ChroniclePage() {
     fetch('/data/linkedin_connections.csv')
       .then(response => response.text())
       .then(csvText => {
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        
-        const data = lines.slice(1)
-          .filter(line => line.trim())
-          .map(line => {
-            const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-            const connection: any = {};
-            headers.forEach((header, index) => {
-              connection[header] = values[index] || '';
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          delimiter: ',',
+          quoteChar: '"',
+          escapeChar: '"',
+          complete: (results) => {
+            if (results.errors.length > 0) {
+              console.error('CSV parsing errors:', results.errors);
+            }
+            
+            // Filter out empty rows and rows with all empty values
+            const filteredData = results.data.filter((row: any) => {
+              // Check if row has any non-empty values
+              const hasContent = Object.values(row).some(value => 
+                value && typeof value === 'string' && value.trim() !== ''
+              );
+              return hasContent && row['First Name'] && row['Last Name'];
             });
-            return connection;
-          })
-          .filter(conn => conn['First Name'] && conn['Last Name']); // Filter out empty rows
 
-        // Add mock location data for demo purposes
-        // In a real app, this would be scraped from LinkedIn profiles
-        const connectionsWithLocation = data.map((conn, index) => ({
-          ...conn,
-          latitude: 40.7128 + (Math.random() - 0.5) * 10, // Random around NYC
-          longitude: -74.0060 + (Math.random() - 0.5) * 10,
-          location: `Location ${index + 1}` // Mock location
-        }));
+            // Add mock location data for demo purposes
+            // In a real app, this would be scraped from LinkedIn profiles
+            const connectionsWithLocation = filteredData.map((conn: any, index: number) => ({
+              ...conn,
+              latitude: 40.7128 + (Math.random() - 0.5) * 10, // Random around NYC
+              longitude: -74.0060 + (Math.random() - 0.5) * 10,
+              location: `Location ${index + 1}` // Mock location
+            }));
 
-        setConnections(connectionsWithLocation);
-        setLoading(false);
+            setConnections(connectionsWithLocation);
+            setLoading(false);
+          },
+          error: (error: any) => {
+            console.error('Error parsing CSV:', error);
+            setLoading(false);
+          }
+        });
       })
       .catch(error => {
         console.error('Error loading connections:', error);
