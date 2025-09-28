@@ -8,6 +8,14 @@ interface ConnectionsTableProps {
   connections: Connection[];
 }
 
+// Utility function to mask names for privacy
+const maskName = (name: string): string => {
+  if (!name || name.trim() === '') return '';
+  const trimmed = name.trim();
+  if (trimmed.length <= 1) return trimmed;
+  return trimmed[0] + '*'.repeat(trimmed.length - 1);
+};
+
 export default function ConnectionsTable({ connections }: ConnectionsTableProps) {
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -117,7 +125,7 @@ export default function ConnectionsTable({ connections }: ConnectionsTableProps)
               <td className="py-3 px-4 text-[#F8F8F8]">
                 <div>
                   <div className="font-medium">
-                    {connection.first_name} {connection.last_name}
+                    {maskName(connection.first_name)} {maskName(connection.last_name)}
                   </div>
                   {connection.email_address && (
                     <div className="text-sm text-[#F8F8F8]/70">

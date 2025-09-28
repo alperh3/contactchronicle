@@ -4,6 +4,14 @@ interface StatsCardsProps {
   connections: Connection[];
 }
 
+// Utility function to mask names for privacy
+const maskName = (name: string): string => {
+  if (!name || name.trim() === '') return '';
+  const trimmed = name.trim();
+  if (trimmed.length <= 1) return trimmed;
+  return trimmed[0] + '*'.repeat(trimmed.length - 1);
+};
+
 export default function StatsCards({ connections }: StatsCardsProps) {
   // Calculate stats
   const totalConnections = connections.length;

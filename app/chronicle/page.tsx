@@ -24,6 +24,14 @@ interface ConnectionWithLocation extends Connection {
   location?: string;
 }
 
+// Utility function to mask names for privacy
+const maskName = (name: string): string => {
+  if (!name || name.trim() === '') return '';
+  const trimmed = name.trim();
+  if (trimmed.length <= 1) return trimmed;
+  return trimmed[0] + '*'.repeat(trimmed.length - 1);
+};
+
 export default function ChroniclePage() {
   const [connections, setConnections] = useState<ConnectionWithLocation[]>([]);
   const [selectedConnection, setSelectedConnection] = useState<ConnectionWithLocation | null>(null);
@@ -42,7 +50,8 @@ export default function ChroniclePage() {
       const { data, error } = await supabase
         .from('connections')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10000); // Increase limit to fetch all connections
 
       if (error) {
         console.error('Error loading connections:', error);
@@ -422,7 +431,7 @@ export default function ChroniclePage() {
                 className="p-4 bg-[#6E6E6E]/10 rounded-lg border border-[#6E6E6E]/20 cursor-pointer hover:bg-[#6E6E6E]/20 transition-colors"
               >
                 <div className="font-medium text-[#F8F8F8]">
-                  {connection.first_name} {connection.last_name}
+                  {maskName(connection.first_name)} {maskName(connection.last_name)}
                 </div>
                 <div className="text-sm text-[#F8F8F8]/70 mt-1">
                   {connection.company || 'N/A'}

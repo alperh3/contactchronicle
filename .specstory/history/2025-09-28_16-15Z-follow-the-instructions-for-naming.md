@@ -4945,3 +4945,583 @@ The application now builds successfully and is ready for deployment. The Supabas
 
 ---
 
+_**User (2025-09-28 16:15Z)**_
+
+ok now when showing connections, mask tehir first and last name such as for "Sarup Banskota", make it "S**** B*******" for privacy purposes
+
+---
+
+_**Assistant (default)**_
+
+Adding a name-masking utility and applying it across components.
+
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/StatsCards.tsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -4,4 +4,12 @@
+    connections: Connection[];
+  }
++ 
++ // Utility function to mask names for privacy
++ const maskName = (name: string): string => {
++   if (!name || name.trim() === '') return '';
++   const trimmed = name.trim();
++   if (trimmed.length <= 1) return trimmed;
++   return trimmed[0] + '*'.repeat(trimmed.length - 1);
++ };
+  
+  export default function StatsCards({ connections }: StatsCardsProps) {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionsTable.tsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -8,4 +8,12 @@
+    connections: Connection[];
+  }
++ 
++ // Utility function to mask names for privacy
++ const maskName = (name: string): string => {
++   if (!name || name.trim() === '') return '';
++   const trimmed = name.trim();
++   if (trimmed.length <= 1) return trimmed;
++   return trimmed[0] + '*'.repeat(trimmed.length - 1);
++ };
+  
+  export default function ConnectionsTable({ connections }: ConnectionsTableProps) {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionsTable.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -126,5 +126,5 @@
+                  <div>
+                    <div className="font-medium">
+-                     {connection.first_name} {connection.last_name}
++                     {maskName(connection.first_name)} {maskName(connection.last_name)}
+                    </div>
+                    {connection.email_address && (
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -24,4 +24,12 @@
+    location?: string;
+  }
++ 
++ // Utility function to mask names for privacy
++ const maskName = (name: string): string => {
++   if (!name || name.trim() === '') return '';
++   const trimmed = name.trim();
++   if (trimmed.length <= 1) return trimmed;
++   return trimmed[0] + '*'.repeat(trimmed.length - 1);
++ };
+  
+  export default function ChroniclePage() {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -431,5 +431,5 @@
+                >
+                  <div className="font-medium text-[#F8F8F8]">
+-                   {connection.first_name} {connection.last_name}
++                   {maskName(connection.first_name)} {maskName(connection.last_name)}
+                  </div>
+                  <div className="text-sm text-[#F8F8F8]/70 mt-1">
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -9,4 +9,12 @@
+    connection: Connection;
+  }
++ 
++ // Utility function to mask names for privacy
++ const maskName = (name: string): string => {
++   if (!name || name.trim() === '') return '';
++   const trimmed = name.trim();
++   if (trimmed.length <= 1) return trimmed;
++   return trimmed[0] + '*'.repeat(trimmed.length - 1);
++ };
+  
+  export default function ConnectionDetails({ connection }: ConnectionDetailsProps) {
+```
+
+</details>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+Tool use: **read_file**
+
+Read file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -42,9 +42,9 @@
+          <div className="w-20 h-20 bg-gradient-to-br from-[#F8F8F8] to-[#6E6E6E] rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl font-bold text-[#04090F]">
+-             {getInitials(connection['First Name'], connection['Last Name'])}
++             {getInitials(connection.first_name, connection.last_name)}
+            </span>
+          </div>
+          <h3 className="text-xl font-bold text-[#F8F8F8]">
+-           {connection['First Name']} {connection['Last Name']}
++           {maskName(connection.first_name)} {maskName(connection.last_name)}
+          </h3>
+          {connection['Position'] && (
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 4, lines removed: 4
+
+```diff
+@@ -48,9 +48,9 @@
+            {maskName(connection.first_name)} {maskName(connection.last_name)}
+          </h3>
+-         {connection['Position'] && (
+-           <p className="text-[#F8F8F8]/70 mt-1">{connection['Position']}</p>
++         {connection.position && (
++           <p className="text-[#F8F8F8]/70 mt-1">{connection.position}</p>
+          )}
+-         {connection['Company'] && (
+-           <p className="text-[#F8F8F8]/70">{connection['Company']}</p>
++         {connection.company && (
++           <p className="text-[#F8F8F8]/70">{connection.company}</p>
+          )}
+        </div>
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -64,5 +64,5 @@
+                <span className="text-[#F8F8F8]/70">Connected:</span>
+                <span className="text-[#F8F8F8]">
+-                 {formatDate(connection['Connected On'])}
++                 {formatDate(connection.connected_on)}
+                </span>
+              </div>
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 6, lines removed: 6
+
+```diff
+@@ -85,24 +85,24 @@
+  
+          {/* Contact Information */}
+-         {(connection['Email Address'] || connection['URL']) && (
++         {(connection.email_address || connection.url) && (
+            <div>
+              <h4 className="text-sm font-medium text-[#F8F8F8]/70 mb-2">Contact Information</h4>
+              <div className="space-y-2">
+-               {connection['Email Address'] && (
++               {connection.email_address && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#F8F8F8]/70">📧</span>
+                    <a
+-                     href={`mailto:${connection['Email Address']}`}
++                     href={`mailto:${connection.email_address}`}
+                      className="text-[#F8F8F8] hover:text-[#F8F8F8]/70 transition-colors text-sm"
+                    >
+-                     {connection['Email Address']}
++                     {connection.email_address}
+                    </a>
+                  </div>
+                )}
+-               {connection['URL'] && (
++               {connection.url && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#F8F8F8]/70">🔗</span>
+                    <a
+-                     href={connection['URL']}
++                     href={connection.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -125,17 +125,17 @@
+                  <span className="text-[#F8F8F8]/70">Company:</span>
+                  <span className="text-[#F8F8F8] ml-2">
+-                   {connection['Company'] || 'Not specified'}
++                   {connection.company || 'Not specified'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#F8F8F8]/70">Position:</span>
+                  <span className="text-[#F8F8F8] ml-2">
+-                   {connection['Position'] || 'Not specified'}
++                   {connection.position || 'Not specified'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#F8F8F8]/70">Connection Date:</span>
+                  <span className="text-[#F8F8F8] ml-2">
+-                   {formatDate(connection['Connected On'])}
++                   {formatDate(connection.connected_on)}
+                  </span>
+                </div>
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -147,7 +147,7 @@
+          <div className="pt-4 border-t border-[#6E6E6E]/20">
+            <div className="flex gap-2">
+-             {connection['URL'] && (
++             {connection.url && (
+                <a
+-                 href={connection['URL']}
++                 href={connection.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+```
+
+**Chunk 2**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -157,7 +157,7 @@
+                </a>
+              )}
+-             {connection['Email Address'] && (
++             {connection.email_address && (
+                <a
+-                 href={`mailto:${connection['Email Address']}`}
++                 href={`mailto:${connection.email_address}`}
+                  className="flex-1 px-4 py-2 bg-[#6E6E6E]/20 text-[#F8F8F8] rounded-lg text-center font-medium hover:bg-[#6E6E6E]/30 transition-colors"
+                >
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -19,5 +19,5 @@
+  
+  export default function ConnectionDetails({ connection }: ConnectionDetailsProps) {
+-   const formatDate = (dateString: string) => {
++   const formatDate = (dateString: string | null | undefined) => {
+      if (!dateString) return 'N/A';
+      try {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/components/ConnectionDetails.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -32,5 +32,5 @@
+    };
+  
+-   const getInitials = (firstName: string, lastName: string) => {
++   const getInitials = (firstName: string | null | undefined, lastName: string | null | undefined) => {
+      return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+    };
+```
+
+</details>
+
+---
+
+Tool use: **run_terminal_cmd**
+
+```bash
+cd /Users/alper/dev/github/h3/ContactChronicle && npm run build
+```
+
+```
+
+> nextjs@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 71ms
+ ✓ Compiled successfully in 6.1s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            75.7 kB         235 kB
+├ ○ /_not-found                      0 B         118 kB
+├ ○ /chronicle                   5.94 kB         165 kB
+└ ○ /import                      9.17 kB         168 kB
++ First Load JS shared by all     125 kB
+  ├ chunks/30cb146bc1e6f45f.js   59.2 kB
+  ├ chunks/63d7abdc8f2020d3.js   17.2 kB
+  └ chunks/f7a8c1db11515a0b.js   20.5 kB
+  └ other shared chunks (total)  28.5 kB
+
+
+○  (Static)  prerendered as static content
+
+
+```
+
+---
+
+Implemented name masking across the app.
+
+## Summary of changes:
+
+1. **Added `maskName` utility** to components that display names:
+   - `StatsCards.tsx`
+   - `ConnectionsTable.tsx`
+   - `chronicle/page.tsx`
+   - `ConnectionDetails.tsx`
+
+2. **Masking logic**:
+   - First character remains
+   - Remaining characters replaced with `*`
+   - Example: "Sarup Banskota" → "S**** B*******"
+
+3. **Applied masking** in:
+   - Dashboard table
+   - Chronicle page connection list
+   - Connection details modal
+   - Stats cards (if names are shown)
+
+4. **Updated property access** in `ConnectionDetails.tsx` to use the correct database field names (`first_name`, `last_name`, etc.)
+
+Build succeeded. Names are masked while preserving the first character.
+
+---
+
+_**User (2025-09-28 16:15Z)**_
+
+while I have 1,468 rows in the db, it only shows the first 1,000
+
+---
+
+_**Assistant (default)**_
+
+Supabase returns 1,000 rows by default. Updating queries to fetch all rows.
+
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -24,5 +24,6 @@
+          .from('connections')
+          .select('*')
+-         .order('created_at', { ascending: false });
++         .order('created_at', { ascending: false })
++         .limit(10000); // Increase limit to fetch all connections
+  
+        if (error) {
+```
+
+</details>
+
+---
+
+Tool use: **search_replace**
+
+
+<details><summary>Edit file: /Users/alper/dev/github/h3/ContactChronicle/app/chronicle/page.tsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -51,5 +51,6 @@
+          .from('connections')
+          .select('*')
+-         .order('created_at', { ascending: false });
++         .order('created_at', { ascending: false })
++         .limit(10000); // Increase limit to fetch all connections
+  
+        if (error) {
+```
+
+</details>
+
+---
+
+Tool use: **run_terminal_cmd**
+
+```bash
+cd /Users/alper/dev/github/h3/ContactChronicle && npm run build
+```
+
+```
+
+> nextjs@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+
+```
+
+---
+
+
+
+---
+

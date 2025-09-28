@@ -23,7 +23,8 @@ export default function Dashboard() {
       const { data, error } = await supabase
         .from('connections')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10000); // Increase limit to fetch all connections
 
       if (error) {
         console.error('Error loading connections:', error);
