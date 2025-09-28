@@ -1,6 +1,4 @@
-interface Connection {
-  [key: string]: string;
-}
+import { Connection } from '../../lib/supabase';
 
 interface StatsCardsProps {
   connections: Connection[];
@@ -13,20 +11,20 @@ export default function StatsCards({ connections }: StatsCardsProps) {
   // Count unique companies
   const uniqueCompanies = new Set(
     connections
-      .map(conn => conn['Company'])
+      .map(conn => conn.company)
       .filter(company => company && company.trim())
   ).size;
   
   // Count unique positions
   const uniquePositions = new Set(
     connections
-      .map(conn => conn['Position'])
+      .map(conn => conn.position)
       .filter(position => position && position.trim())
   ).size;
   
   // Calculate connections by year
   const connectionsByYear = connections.reduce((acc, conn) => {
-    const connectedOn = conn['Connected On'];
+    const connectedOn = conn.connected_on;
     if (connectedOn) {
       const year = new Date(connectedOn).getFullYear();
       if (!isNaN(year)) {

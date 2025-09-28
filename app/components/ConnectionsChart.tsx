@@ -25,9 +25,7 @@ ChartJS.register(
   Legend
 );
 
-interface Connection {
-  [key: string]: string;
-}
+import { Connection } from '../../lib/supabase';
 
 interface ConnectionsChartProps {
   connections: Connection[];
@@ -36,7 +34,7 @@ interface ConnectionsChartProps {
 export default function ConnectionsChart({ connections }: ConnectionsChartProps) {
   // Process data for monthly connections
   const monthlyData = connections.reduce((acc, conn) => {
-    const connectedOn = conn['Connected On'];
+    const connectedOn = conn.connected_on;
     if (connectedOn) {
       const date = new Date(connectedOn);
       if (!isNaN(date.getTime())) {
@@ -59,7 +57,7 @@ export default function ConnectionsChart({ connections }: ConnectionsChartProps)
 
   // Process data for company distribution (top 10)
   const companyData = connections.reduce((acc, conn) => {
-    const company = conn['Company'];
+    const company = conn.company;
     if (company && company.trim()) {
       acc[company] = (acc[company] || 0) + 1;
     }

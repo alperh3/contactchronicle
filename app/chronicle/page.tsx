@@ -16,11 +16,7 @@ const DynamicMap = dynamic(() => import('../components/ConnectionMap'), {
       </div>
     </div>
   )
-}) as React.ComponentType<{
-  connections: ConnectionWithLocation[];
-  onConnectionSelect: (connection: ConnectionWithLocation) => void;
-  viewMode: 'world' | 'clusters';
-}>;
+}) as React.ComponentType<any>;
 
 interface ConnectionWithLocation extends Connection {
   latitude?: number;

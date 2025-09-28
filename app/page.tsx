@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Papa from 'papaparse';
 import { supabase, Connection } from '../lib/supabase';
 import ConnectionsTable from './components/ConnectionsTable';
 import ConnectionsChart from './components/ConnectionsChart';

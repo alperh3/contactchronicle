@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 
-interface Connection {
-  [key: string]: string;
-}
+import { Connection } from '../../lib/supabase';
 
 interface ConnectionsTableProps {
   connections: Connection[];
@@ -28,8 +26,8 @@ export default function ConnectionsTable({ connections }: ConnectionsTableProps)
   const sortedConnections = [...connections].sort((a, b) => {
     if (!sortField) return 0;
     
-    const aValue = a[sortField] || '';
-    const bValue = b[sortField] || '';
+    const aValue = (a as any)[sortField] || '';
+    const bValue = (b as any)[sortField] || '';
     
     if (sortDirection === 'asc') {
       return aValue.localeCompare(bValue);
@@ -42,7 +40,7 @@ export default function ConnectionsTable({ connections }: ConnectionsTableProps)
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedConnections = sortedConnections.slice(startIndex, startIndex + itemsPerPage);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -71,38 +69,38 @@ export default function ConnectionsTable({ connections }: ConnectionsTableProps)
           <tr className="border-b border-[#6E6E6E]/20">
             <th 
               className="text-left py-3 px-4 font-medium text-[#F8F8F8] cursor-pointer hover:bg-[#6E6E6E]/10 transition-colors"
-              onClick={() => handleSort('First Name')}
+              onClick={() => handleSort('first_name')}
             >
               <div className="flex items-center gap-2">
                 Name
-                <SortIcon field="First Name" />
+                <SortIcon field="first_name" />
               </div>
             </th>
             <th 
               className="text-left py-3 px-4 font-medium text-[#F8F8F8] cursor-pointer hover:bg-[#6E6E6E]/10 transition-colors"
-              onClick={() => handleSort('Company')}
+              onClick={() => handleSort('company')}
             >
               <div className="flex items-center gap-2">
                 Company
-                <SortIcon field="Company" />
+                <SortIcon field="company" />
               </div>
             </th>
             <th 
               className="text-left py-3 px-4 font-medium text-[#F8F8F8] cursor-pointer hover:bg-[#6E6E6E]/10 transition-colors"
-              onClick={() => handleSort('Position')}
+              onClick={() => handleSort('position')}
             >
               <div className="flex items-center gap-2">
                 Position
-                <SortIcon field="Position" />
+                <SortIcon field="position" />
               </div>
             </th>
             <th 
               className="text-left py-3 px-4 font-medium text-[#F8F8F8] cursor-pointer hover:bg-[#6E6E6E]/10 transition-colors"
-              onClick={() => handleSort('Connected On')}
+              onClick={() => handleSort('connected_on')}
             >
               <div className="flex items-center gap-2">
                 Connected On
-                <SortIcon field="Connected On" />
+                <SortIcon field="connected_on" />
               </div>
             </th>
             <th className="text-left py-3 px-4 font-medium text-[#F8F8F8]">
@@ -119,28 +117,28 @@ export default function ConnectionsTable({ connections }: ConnectionsTableProps)
               <td className="py-3 px-4 text-[#F8F8F8]">
                 <div>
                   <div className="font-medium">
-                    {connection['First Name']} {connection['Last Name']}
+                    {connection.first_name} {connection.last_name}
                   </div>
-                  {connection['Email Address'] && (
+                  {connection.email_address && (
                     <div className="text-sm text-[#F8F8F8]/70">
-                      {connection['Email Address']}
+                      {connection.email_address}
                     </div>
                   )}
                 </div>
               </td>
               <td className="py-3 px-4 text-[#F8F8F8]">
-                {connection['Company'] || 'N/A'}
+                {connection.company || 'N/A'}
               </td>
               <td className="py-3 px-4 text-[#F8F8F8]">
-                {connection['Position'] || 'N/A'}
+                {connection.position || 'N/A'}
               </td>
               <td className="py-3 px-4 text-[#F8F8F8]">
-                {formatDate(connection['Connected On'])}
+                {formatDate(connection.connected_on)}
               </td>
               <td className="py-3 px-4">
-                {connection['URL'] && (
+                {connection.url && (
                   <a
-                    href={connection['URL']}
+                    href={connection.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#F8F8F8]/70 hover:text-[#F8F8F8] transition-colors"

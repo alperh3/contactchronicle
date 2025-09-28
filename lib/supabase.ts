@@ -10,14 +10,14 @@ export interface Connection {
   id?: number
   first_name: string
   last_name: string
-  url?: string
-  email_address?: string
-  company?: string
-  position?: string
-  connected_on?: string
-  location?: string
-  latitude?: number
-  longitude?: number
+  url?: string | null
+  email_address?: string | null
+  company?: string | null
+  position?: string | null
+  connected_on?: string | null
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
   created_at?: string
   updated_at?: string
 }
